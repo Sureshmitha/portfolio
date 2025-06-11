@@ -222,8 +222,12 @@ body {
 
 .photo-img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    border-radius: 50%;
+    animation: glow 2s ease-in-out infinite alternate;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
 }
 
 .hero-title {
@@ -625,8 +629,11 @@ body {
 }
 
 .project-image {
-    height: 16rem;
+    width: 100%;
+    height: 300px;
     overflow: hidden;
+    border-radius: 0.5rem;
+    position: relative;
 }
 
 .project-image img {
@@ -634,6 +641,9 @@ body {
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
 }
 
 .project-card:hover .project-image img {
@@ -1309,4 +1319,34 @@ body {
     .social-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Ensure images don't get hidden by animations */
+img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Image Loading States */
+img.loading {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+img.loaded {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+img.error {
+    opacity: 0.3;
+}
+
+/* Prevent any unwanted transitions or animations from affecting images */
+img {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
 }

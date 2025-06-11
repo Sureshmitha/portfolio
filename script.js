@@ -289,21 +289,57 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Download resume functionality
-function downloadResume() {
-    // In a real implementation, you would have the actual resume file
-    // For now, we'll show a notification
-    showNotification('Resume download feature will be available once the PDF file is added to the project.', 'info');
+function downloadResume(event) {
+    event.preventDefault();
+    
+    const link = event.currentTarget;
+    const url = link.href;
+    const fileName = link.getAttribute('download');
+    
+    // Show loading state
+    const originalContent = link.innerHTML;
+    link.innerHTML = '<i data-lucide="loader-2"></i> Downloading...';
+    lucide.createIcons();
+    
+    // Fetch the PDF file
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Create a temporary link to trigger download
+            const tempLink = document.createElement('a');
+            const objectUrl = window.URL.createObjectURL(blob);
+            
+            tempLink.href = objectUrl;
+            tempLink.download = fileName;
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(objectUrl);
+            document.body.removeChild(tempLink);
+            
+            // Show success message
+            showNotification('Resume downloaded successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Download failed:', error);
+            showNotification('Failed to download resume. Please try again.', 'error');
+        })
+        .finally(() => {
+            // Reset button state
+            link.innerHTML = originalContent;
+            lucide.createIcons();
+        });
 }
 
-// Add download functionality to resume button
+// Initialize download functionality
 document.addEventListener('DOMContentLoaded', function() {
-    const downloadBtn = document.querySelector('.download-btn');
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            downloadResume();
-        });
-    }
+    // Add other initialization code here if needed
 });
 
 // Add hover effects for project cards and other interactive elements
@@ -356,27 +392,59 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
 });
 
-// Performance optimization: Lazy loading for images
+// Handle image loading
 document.addEventListener('DOMContentLoaded', function() {
+    // Get all images
     const images = document.querySelectorAll('img');
     
-    const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.style.opacity = '0';
-                img.style.transition = 'opacity 0.3s ease';
-                
-                img.onload = () => {
-                    img.style.opacity = '1';
-                };
-                
-                imageObserver.unobserve(img);
-            }
-        });
-    });
-    
+    // Handle each image
     images.forEach(img => {
-        imageObserver.observe(img);
+        // Add loading class
+        img.classList.add('loading');
+        
+        // Handle successful load
+        img.onload = function() {
+            img.classList.remove('loading');
+            img.classList.add('loaded');
+        };
+        
+        // Handle load errors
+        img.onerror = function() {
+            console.error('Error loading image:', img.src);
+            img.classList.remove('loading');
+            img.classList.add('error');
+        };
+        
+        // Force reload the image
+        const currentSrc = img.src;
+        img.src = '';
+        img.src = currentSrc;
     });
+});
+
+// Preload images
+window.addEventListener('load', function() {
+    const images = [
+        'image1.jpg',
+        'trading.png',
+        'cricket_image.png',
+        'image.png'
+    ];
+    
+    images.forEach(src => {
+        const img = new Image();
+        img.src = src;
+    });
+});
+
+// Add error handling for images
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.getElementsByTagName('img');
+    for(let img of images) {
+        img.onerror = function() {
+            console.error('Error loading image:', img.src);
+            // Optionally set a fallback image
+            // img.src = 'fallback.png';
+        };
+    }
 });
